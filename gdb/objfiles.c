@@ -581,6 +581,8 @@ static void
 relocate_one_symbol (struct symbol *sym, struct objfile *objfile,
 		     const section_offsets &delta)
 {
+  gdb_printf (_("%s:%d \033[1;31mvalue 0x%lx, delta 0x%lx\033[m\n"), __func__, __LINE__,
+    sym->value_address (), delta[sym->section_index ()]);
   /* The RS6000 code from which this was taken skipped
      any symbols in STRUCT_DOMAIN or UNDEF_DOMAIN.
      But I'm leaving out that test, on the theory that
@@ -604,14 +606,22 @@ objfile_relocate1 (struct objfile *objfile,
 
   int something_changed = 0;
 
+  gdb_printf (_("%s:%d \n"), __func__, __LINE__);
+
   for (int i = 0; i < objfile->section_offsets.size (); ++i)
     {
       delta[i] = new_offsets[i] - objfile->section_offsets[i];
+      gdb_printf (_("%s:%d delta[%d] 0x%lx\n"), __func__, __LINE__, i, delta[i]);
       if (delta[i] != 0)
 	something_changed = 1;
     }
+
+  gdb_printf (_("%s:%d \n"), __func__, __LINE__);
+
   if (!something_changed)
     return 0;
+
+  gdb_printf (_("%s:%d \n"), __func__, __LINE__);
 
   /* OK, get all the symtabs.  */
   for (compunit_symtab *cust : objfile->compunits ())
@@ -633,6 +643,8 @@ objfile_relocate1 (struct objfile *objfile,
 	      r.set_end (r.end () + delta[block_line_section]);
 	    }
 
+          gdb_printf (_("%s:%d \n"), __func__, __LINE__);
+
 	  /* We only want to iterate over the local symbols, not any
 	     symbols in included symtabs.  */
 	  for (struct symbol *sym : b->multidict_symbols ())
@@ -644,8 +656,13 @@ objfile_relocate1 (struct objfile *objfile,
   for (symbol *iter = objfile->template_symbols; iter; iter = iter->hash_next)
     relocate_one_symbol (iter, objfile, delta);
 
+  gdb_printf (_("%s:%d \n"), __func__, __LINE__);
+
   for (int i = 0; i < objfile->section_offsets.size (); ++i)
+    {
     objfile->section_offsets[i] = new_offsets[i];
+    gdb_printf (_("%s:%d section_offsets[%d] 0x%lx\n"), __func__, __LINE__, i, objfile->section_offsets[i]);
+    }
 
   /* Rebuild section map next time we need it.  */
   get_objfile_pspace_data (objfile->pspace ())->section_map_dirty = 1;
@@ -655,6 +672,7 @@ objfile_relocate1 (struct objfile *objfile,
     {
       int idx = s - objfile->sections_start;
 
+      gdb_printf (_("%s:%d idx %d \033[1;33m%s\033[m\n"), __func__, __LINE__, idx, objfile_name(objfile));
       exec_set_section_address (bfd_get_filename (objfile->obfd.get ()), idx,
 				s->addr ());
     }
@@ -677,6 +695,7 @@ objfile_relocate (struct objfile *objfile,
 		  const section_offsets &new_offsets)
 {
   int changed = 0;
+  gdb_printf (_("%s:%d \n"), __func__, __LINE__);
 
   changed |= objfile_relocate1 (objfile, new_offsets);
 
@@ -699,6 +718,7 @@ objfile_relocate (struct objfile *objfile,
 	(debug_objfile->section_offsets.size ());
       relative_addr_info_to_section_offsets (new_debug_offsets, objfile_addrs);
 
+      gdb_printf (_("%s:%d \n"), __func__, __LINE__);
       changed |= objfile_relocate1 (debug_objfile, new_debug_offsets);
     }
 
@@ -715,6 +735,7 @@ static int
 objfile_rebase1 (struct objfile *objfile, CORE_ADDR slide)
 {
   section_offsets new_offsets (objfile->section_offsets.size (), slide);
+  gdb_printf (_("%s:%d sec size 0x%lx, slide 0x%lx\n"), __func__, __LINE__, objfile->section_offsets.size (), slide);
   return objfile_relocate1 (objfile, new_offsets);
 }
 
@@ -726,6 +747,7 @@ objfile_rebase (struct objfile *objfile, CORE_ADDR slide)
 {
   int changed = 0;
 
+  gdb_printf (_("%s:%d slide 0x%lx\n"), __func__, __LINE__, slide);
   for (::objfile *debug_objfile : objfile->separate_debug_objfiles ())
     changed |= objfile_rebase1 (debug_objfile, slide);
 

@@ -460,6 +460,7 @@ print_unpacked_pointer (struct type *type, struct type *elttype,
       print_function_pointer_address (options, gdbarch, address, stream);
       return;
     }
+  gdb_printf (_("%s:%d address 0x%lx\n"), __func__, __LINE__, address);
 
   if (options->symbol_print)
     print_address_demangle (options, gdbarch, address, stream, demangle);
@@ -615,8 +616,11 @@ generic_val_print_ref (struct type *type,
   if (options->deref_ref)
     {
       if (type_is_defined)
+        {
+        gdb_printf (_("%s:%d deref_val->address 0x%lx\n"), __func__, __LINE__, deref_val->address());
 	common_val_print (deref_val, stream, recurse, options,
 			  current_language);
+        }
       else
 	gdb_puts ("???", stream);
     }
@@ -747,6 +751,8 @@ generic_val_print_func (struct type *type,
   gdb_printf (stream, "{");
   type_print (type, "", stream, -1);
   gdb_printf (stream, "} ");
+
+  gdb_printf (_("%s:%d address 0x%lx\n"), __func__, __LINE__, address);
   /* Try to print what function it points to, and its address.  */
   print_address_demangle (options, gdbarch, address, stream, demangle);
 }
@@ -911,6 +917,7 @@ generic_value_print (struct value *val, struct ui_file *stream, int recurse,
 {
   struct type *type = val->type ();
 
+  gdb_printf (_("%s:%d val->address 0x%lx\n"), __func__, __LINE__, val->address());
   type = check_typedef (type);
 
   if (is_fixed_point_type (type))
@@ -961,6 +968,7 @@ generic_value_print (struct value *val, struct ui_file *stream, int recurse,
 
     case TYPE_CODE_FUNC:
     case TYPE_CODE_METHOD:
+      gdb_printf (_("%s:%d val->address 0x%lx\n"), __func__, __LINE__, val->address());
       if (options->format)
 	value_print_scalar_formatted (val, options, 0, stream);
       else
@@ -1035,6 +1043,7 @@ common_val_print (struct value *value, struct ui_file *stream, int recurse,
 		  const struct value_print_options *options,
 		  const struct language_defn *language)
 {
+  gdb_printf (_("%s:%d value->address 0x%lx\n"), __func__, __LINE__, value->address());
   if (language->la_language == language_ada)
     /* The value might have a dynamic type, which would cause trouble
        below when trying to extract the value contents (since the value
@@ -1090,6 +1099,7 @@ common_val_print (struct value *value, struct ui_file *stream, int recurse,
 
   try
     {
+      gdb_printf (_("%s:%d value->address 0x%lx\n"), __func__, __LINE__, value->address());
       language->value_print_inner (value, stream, recurse, &local_opts);
     }
   catch (const gdb_exception_error &except)
@@ -1176,6 +1186,7 @@ common_val_print_checked (struct value *val, struct ui_file *stream,
 {
   if (!value_check_printable (val, stream, options))
     return;
+  gdb_printf (_("%s:%d val->address 0x%lx\n"), __func__, __LINE__, val->address());
   common_val_print (val, stream, recurse, options, language);
 }
 
@@ -1287,6 +1298,7 @@ value_print_scalar_formatted (struct value *val,
       struct value_print_options opts = *options;
       opts.format = 0;
       opts.deref_ref = false;
+      gdb_printf (_("%s:%d val->address 0x%lx\n"), __func__, __LINE__, val->address());
       common_val_print (val, stream, 0, &opts, current_language);
       return;
     }
@@ -1912,6 +1924,7 @@ print_function_pointer_address (const struct value_print_options *options,
       gdb_puts (paddress (gdbarch, address), stream);
       gdb_puts (": ", stream);
     }
+  gdb_printf (_("%s:%d address 0x%lx\n"), __func__, __LINE__, address);
   print_address_demangle (options, gdbarch, func_addr, stream, demangle);
 }
 
@@ -2036,6 +2049,7 @@ value_print_array_elements (struct value *val, struct ui_file *stream,
 	    }
 	}
 
+      gdb_printf (_("%s:%d element->address 0x%lx\n"), __func__, __LINE__, element->address());
       common_val_print (element, stream, recurse + 1, options,
 			current_language);
 

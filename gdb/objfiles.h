@@ -378,6 +378,7 @@ struct obj_section
   /* The memory address of the section (vma + offset).  */
   CORE_ADDR addr () const
   {
+    gdb_printf (_("%s:%s:%d vma 0x%lx + offset 0x%lx %s\n"), __FILE__, __func__, __LINE__, bfd_section_vma (this->the_bfd_section), this->offset (), this->the_bfd_section->name);
     return bfd_section_vma (this->the_bfd_section) + this->offset ();
   }
 
@@ -908,6 +909,7 @@ obj_section::offset () const
 inline void
 obj_section::set_offset (CORE_ADDR offset)
 {
+  gdb_printf (_("%s:%d set offset %lx\n"), __func__, __LINE__, offset);
   this->objfile->set_section_offset (this->the_bfd_section, offset);
 }
 

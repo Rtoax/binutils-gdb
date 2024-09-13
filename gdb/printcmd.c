@@ -563,6 +563,8 @@ print_address_symbolic (struct gdbarch *gdbarch, CORE_ADDR addr,
   int offset = 0;
   int line = 0;
 
+  gdb_printf (_("%s:%d addr 0x%lx\n"), __func__, __LINE__, addr);
+
   if (build_address_symbolic (gdbarch, addr, do_demangle, false, &name,
 			      &offset, &filename, &line, &unmapped))
     return 0;
@@ -613,6 +615,8 @@ build_address_symbolic (struct gdbarch *gdbarch,
   
   /* Let's say it is mapped (not unmapped).  */
   *unmapped = 0;
+
+  gdb_printf (_("%s:%d addr 0x%lx\n"), __func__, __LINE__, addr);
 
   /* Determine if the address is in an overlay, and whether it is
      mapped.  */
@@ -714,9 +718,13 @@ build_address_symbolic (struct gdbarch *gdbarch,
       && name_location + max_symbolic_offset > name_location)
     return 1;
 
+  gdb_printf (_("%s:%d name_location 0x%lx\n"), __func__, __LINE__, name_location);
+
   *offset = (LONGEST) addr - name_location;
 
   *name = name_temp;
+
+  gdb_printf (_("%s:%d name %s offset 0x%x\n"), __func__, __LINE__, name_temp, *offset);
 
   if (print_symbol_filename)
     {
@@ -742,6 +750,7 @@ void
 print_address (struct gdbarch *gdbarch,
 	       CORE_ADDR addr, struct ui_file *stream)
 {
+  gdb_printf (_("%s:%d addr 0x%lx\n"), __func__, __LINE__, addr);
   fputs_styled (paddress (gdbarch, addr), address_style.style (), stream);
   print_address_symbolic (gdbarch, addr, stream, asm_demangle, " ");
 }
@@ -773,6 +782,7 @@ print_address_demangle (const struct value_print_options *opts,
 			struct gdbarch *gdbarch, CORE_ADDR addr,
 			struct ui_file *stream, int do_demangle)
 {
+  gdb_printf (_("%s:%d addr 0x%lx\n"), __func__, __LINE__, addr);
   if (opts->addressprint)
     {
       fputs_styled (paddress (gdbarch, addr), address_style.style (), stream);
@@ -1015,6 +1025,8 @@ do_examine (struct format_data fmt, struct gdbarch *gdbarch, CORE_ADDR addr)
   count = fmt.count;
   next_gdbarch = gdbarch;
   next_address = addr;
+
+  gdb_printf (_("%s:%d addr 0x%lx\n"), __func__, __LINE__, addr);
 
   /* Instruction format implies fetch single bytes
      regardless of the specified size.

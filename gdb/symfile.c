@@ -477,6 +477,8 @@ addr_info_make_relative (section_addr_info *addrs, bfd *abfd)
   CORE_ADDR lower_offset;
   int i;
 
+  gdb_printf (_("%s:%d\n"), __func__, __LINE__);
+
   /* Find lowest loadable section to be used as starting point for
      contiguous sections.  */
   lower_sect = NULL;
@@ -490,6 +492,10 @@ addr_info_make_relative (section_addr_info *addrs, bfd *abfd)
     }
   else
     lower_offset = bfd_section_vma (lower_sect);
+
+  gdb_printf (_("%s:%d\n"), __func__, __LINE__);
+  gdb_printf (_("Lowest section %s, offset 0x%lx\n"),
+		bfd_section_name (lower_sect), lower_offset);
 
   /* Create ADDRS_TO_ABFD_ADDRS array to map the sections in ADDRS to sections
      in ABFD.  Section names are not unique - there can be multiple sections of
@@ -762,6 +768,8 @@ read_symbols (struct objfile *objfile, symfile_add_flags add_flags)
   (*objfile->sf->sym_read) (objfile, add_flags);
   objfile->per_bfd->minsyms_read = true;
 
+  gdb_printf (_("read_symbols %s:%d\n"), __func__, __LINE__);
+
   /* find_separate_debug_file_in_section should be called only if there is
      single binary with no existing separate debug info file.  */
   if (!objfile->has_partial_symbols ()
@@ -772,6 +780,7 @@ read_symbols (struct objfile *objfile, symfile_add_flags add_flags)
 
       if (abfd != NULL)
 	{
+	  gdb_printf (_("symbol_file_add_separate start\n"));
 	  /* find_separate_debug_file_in_section uses the same filename for the
 	     virtual section-as-bfd like the bfd filename containing the
 	     section.  Therefore use also non-canonical name form for the same
@@ -886,6 +895,8 @@ syms_from_objfile_1 (struct objfile *objfile,
   section_addr_info local_addr;
   const int mainline = add_flags & SYMFILE_MAINLINE;
 
+  gdb_printf (_("%s:%d\n"), __func__, __LINE__);
+
   objfile_set_sym_fns (objfile, find_sym_fns (objfile->obfd.get ()));
   objfile->qf.clear ();
 
@@ -933,6 +944,8 @@ syms_from_objfile_1 (struct objfile *objfile,
       (*objfile->sf->sym_new_init) (objfile);
     }
 
+  gdb_printf (_("%s:%d\n"), __func__, __LINE__);
+
   /* Convert addr into an offset rather than an absolute address.
      We find the lowest address of a loaded segment in the objfile,
      and assume that <addr> is where that got loaded.
@@ -951,6 +964,9 @@ syms_from_objfile_1 (struct objfile *objfile,
 
   (*objfile->sf->sym_offsets) (objfile, *addrs);
 
+  gdb_printf (_("%s:%d\n"), __func__, __LINE__);
+  gdb_printf (_("read_symbols start\n"));
+
   read_symbols (objfile, add_flags);
 
   /* Discard cleanups as symbol reading was successful.  */
@@ -968,6 +984,7 @@ syms_from_objfile (struct objfile *objfile,
 		   section_addr_info *addrs,
 		   symfile_add_flags add_flags)
 {
+  gdb_printf (_("syms_from_objfile_1 start\n"));
   syms_from_objfile_1 (objfile, addrs, add_flags);
   init_entry_point_info (objfile);
 }
@@ -1031,6 +1048,8 @@ symbol_file_add_with_addrs (const gdb_bfd_ref_ptr &abfd, const char *name,
 			    && (readnow_symbol_files
 				|| (add_flags & SYMFILE_NO_READ) == 0));
 
+  gdb_printf (_("%s:%d name %s\n"), __func__, __LINE__, name);
+
   if (readnow_symbol_files)
     {
       flags |= OBJF_READNOW;
@@ -1047,6 +1066,8 @@ symbol_file_add_with_addrs (const gdb_bfd_ref_ptr &abfd, const char *name,
 
   /* Give user a chance to burp if ALWAYS_CONFIRM or we'd be
      interactively wiping out any existing symbols.  */
+
+  gdb_printf (_("%s:%d\n"), __func__, __LINE__);
 
   if (from_tty
       && (always_confirm
@@ -1073,6 +1094,10 @@ symbol_file_add_with_addrs (const gdb_bfd_ref_ptr &abfd, const char *name,
 	gdb_printf (_("Reading symbols from %ps...\n"),
 		    styled_string (file_name_style.style (), name));
     }
+
+  gdb_printf (_("%s:%d\n"), __func__, __LINE__);
+  gdb_printf (_("syms_from_objfile start\n"));
+
   syms_from_objfile (objfile, addrs, add_flags);
 
   /* We now have at least a partial symbol table.  Check to see if the
@@ -1130,6 +1155,8 @@ symbol_file_add_separate (const gdb_bfd_ref_ptr &bfd, const char *name,
      vma may have been modified by tools such as prelink.  */
   section_addr_info sap = build_section_addr_info_from_objfile (objfile);
 
+  gdb_printf (_("%s:%d\n"), __func__, __LINE__);
+
   symbol_file_add_with_addrs
     (bfd, name, symfile_flags, &sap,
      objfile->flags & (OBJF_SHARED | OBJF_READNOW
@@ -1147,6 +1174,7 @@ symbol_file_add_from_bfd (const gdb_bfd_ref_ptr &abfd, const char *name,
 			  section_addr_info *addrs,
 			  objfile_flags flags, struct objfile *parent)
 {
+  gdb_printf (_("%s:%d name %s\n"), __func__, __LINE__, name);
   return symbol_file_add_with_addrs (abfd, name, add_flags, addrs, flags,
 				     parent);
 }
@@ -1160,6 +1188,7 @@ symbol_file_add (const char *name, symfile_add_flags add_flags,
 {
   gdb_bfd_ref_ptr bfd (symfile_bfd_open (name));
 
+  gdb_printf (_("%s:%d name %s\n"), __func__, __LINE__, name);
   return symbol_file_add_from_bfd (bfd, name, add_flags, addrs,
 				   flags, NULL);
 }
@@ -1175,6 +1204,7 @@ symbol_file_add (const char *name, symfile_add_flags add_flags,
 void
 symbol_file_add_main (const char *args, symfile_add_flags add_flags)
 {
+  gdb_printf (_("%s:%d\n"), __func__, __LINE__);
   symbol_file_add_main_1 (args, add_flags, 0, 0);
 }
 
@@ -1184,6 +1214,7 @@ symbol_file_add_main_1 (const char *args, symfile_add_flags add_flags,
 {
   add_flags |= current_inferior ()->symfile_flags | SYMFILE_MAINLINE;
 
+  gdb_printf (_("%s:%d reloff 0x%lx\n"), __func__, __LINE__, reloff);
   struct objfile *objfile = symbol_file_add (args, add_flags, NULL, flags);
   if (reloff != 0)
     objfile_rebase (objfile, reloff);
@@ -2313,6 +2344,7 @@ add_symbol_file_command (const char *args, int from_tty)
   if (from_tty && (!query ("%s", "")))
     error (_("Not confirmed."));
 
+  gdb_printf (_("%s:%d filename %s\n"), __func__, __LINE__, filename.get());
   objf = symbol_file_add (filename.get (), add_flags, &section_addrs,
 			  flags);
   if (!objfile_has_symbols (objf) && objf->per_bfd->minimal_symbol_count <= 0)

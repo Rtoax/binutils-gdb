@@ -289,6 +289,7 @@ pascal_language::value_print_inner (struct value *val,
     case TYPE_CODE_UNDEF:
     case TYPE_CODE_BOOL:
     case TYPE_CODE_CHAR:
+      gdb_printf (_("%s:%d val->address 0x%lx\n"), __func__, __LINE__, val->address());
       generic_value_print (val, stream, recurse, options, &p_decorations);
       break;
 

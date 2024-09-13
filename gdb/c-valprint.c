@@ -216,6 +216,7 @@ print_unpacked_pointer (struct type *type, struct type *elttype,
 	      wtype = unresolved_elttype;
 	    }
 	  vt_val = value_at (wtype, vt_address);
+	  gdb_printf (_("%s:%d vt_val->address 0x%lx\n"), __func__, __LINE__, vt_val->address());
 	  common_val_print (vt_val, stream, recurse + 1, options,
 			    current_language);
 	  if (options->prettyformat)
@@ -461,6 +462,7 @@ c_value_print_inner (struct value *val, struct ui_file *stream, int recurse,
     case TYPE_CODE_UNDEF:
     case TYPE_CODE_COMPLEX:
     default:
+      gdb_printf (_("%s:%d val->address 0x%lx\n"), __func__, __LINE__, val->address());
       generic_value_print (val, stream, recurse, options, &c_decorations);
       break;
     }
@@ -475,6 +477,8 @@ c_value_print (struct value *val, struct ui_file *stream,
   int full, using_enc;
   LONGEST top;
   struct value_print_options opts = *options;
+
+  gdb_printf (_("%s:%d val->address 0x%lx\n"), __func__, __LINE__, val->address());
 
   opts.deref_ref = true;
 
@@ -585,5 +589,6 @@ c_value_print (struct value *val, struct ui_file *stream,
 	}
     }
 
+  gdb_printf (_("%s:%d val->address 0x%lx\n"), __func__, __LINE__, val->address());
   common_val_print (val, stream, 0, &opts, current_language);
 }

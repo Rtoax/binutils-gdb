@@ -636,6 +636,7 @@ void
 language_defn::value_print (struct value *val, struct ui_file *stream,
 	       const struct value_print_options *options) const
 {
+  gdb_printf (_("%s:%d val->address 0x%lx\n"), __func__, __LINE__, val->address());
   return c_value_print (val, stream, options);
 }
 
@@ -654,6 +655,7 @@ language_defn::value_print_inner
 	(struct value *val, struct ui_file *stream, int recurse,
 	 const struct value_print_options *options) const
 {
+  gdb_printf (_("%s:%d val->address 0x%lx\n"), __func__, __LINE__, val->address());
   return c_value_print_inner (val, stream, recurse, options);
 }
 
