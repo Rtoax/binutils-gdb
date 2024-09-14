@@ -1040,6 +1040,7 @@ exec_set_section_address (const char *filename, int index, CORE_ADDR address)
 	{
 	  p.endaddr += address - p.addr;
 	  p.addr = address;
+	  gdb_printf (_("%s:%d \033[1;31maddr 0x%lx ~ 0x%lx\033[m %s\n"), __func__, __LINE__, address, p.endaddr, p.the_bfd_section->name);
 	}
     }
 }
